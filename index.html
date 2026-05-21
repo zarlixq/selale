@@ -460,7 +460,7 @@
       <article class="product-card reveal" data-category="bahce">
         <a href="#iletisim" class="block group">
           <div class="image-wrap aspect-[4/3]">
-            <img loading="lazy" src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80"
+            <img loading="lazy" src="fotograflar/selale4.jpeg"
                  alt="Toros XL villa bahçesi için anıtsal kayalık şelale" class="product-image w-full h-full object-cover">
             <div class="product-overlay"></div>
           </div>
@@ -480,7 +480,7 @@
       <article class="product-card reveal" data-category="duvar">
         <a href="#iletisim" class="block group">
           <div class="image-wrap aspect-[3/4]">
-            <img loading="lazy" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80"
+            <img loading="lazy" src="fotograflar/selale5.jpeg"
                  alt="Granit Akış modern duvar paneli şelalesi" class="product-image w-full h-full object-cover">
             <div class="product-overlay"></div>
           </div>
@@ -500,7 +500,7 @@
       <article class="product-card reveal" data-category="ozel">
         <a href="#iletisim" class="block group">
           <div class="image-wrap aspect-[3/5]">
-            <img loading="lazy" src="https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?w=800&q=80"
+            <img loading="lazy" src="fotograflar/selale2.jpeg"
                  alt="Kapadokya 300 tüf görünümlü dev kayalık özel üretim" class="product-image w-full h-full object-cover">
             <div class="product-overlay"></div>
           </div>
@@ -520,7 +520,7 @@
       <article class="product-card reveal" data-category="bahce">
         <a href="#iletisim" class="block group">
           <div class="image-wrap aspect-[4/3]">
-            <img loading="lazy" src="https://images.unsplash.com/photo-1493857671505-72967e2e2760?w=800&q=80"
+            <img loading="lazy" src="fotograflar/selale3.jpeg"
                  alt="Bahçe Düşü havuza entegre sirkülasyonlu şelale" class="product-image w-full h-full object-cover">
             <div class="product-overlay"></div>
           </div>
@@ -540,7 +540,7 @@
       <article class="product-card reveal" data-category="kose">
         <a href="#iletisim" class="block group">
           <div class="image-wrap aspect-square">
-            <img loading="lazy" src="https://images.unsplash.com/photo-1678754183715-87b12a70ef28?w=800&q=80"
+            <img loading="lazy" src="fotograflar/selale4.jpeg"
                  alt="Andezit Mini teras ve balkonlar için kompakt köşe şelalesi" class="product-image w-full h-full object-cover">
             <div class="product-overlay"></div>
           </div>
@@ -560,7 +560,7 @@
       <article class="product-card reveal" data-category="kayalik">
         <a href="#iletisim" class="block group">
           <div class="image-wrap aspect-[4/5]">
-            <img loading="lazy" src="https://images.unsplash.com/photo-1496449903678-68ddcb189a24?w=800&q=80"
+            <img loading="lazy" src="fotograflar/selale5.jpeg"
                  alt="Çağlayan 240 çok katmanlı kayalık şelale" class="product-image w-full h-full object-cover">
             <div class="product-overlay"></div>
           </div>
@@ -580,7 +580,7 @@
       <article class="product-card reveal" data-category="duvar">
         <a href="#iletisim" class="block group">
           <div class="image-wrap aspect-[3/4]">
-            <img loading="lazy" src="https://images.unsplash.com/photo-1761538236523-7b173413e27a?w=800&q=80"
+            <img loading="lazy" src="fotograflar/selale2.jpeg"
                  alt="Mermer Akış otel ve ofisler için mat mermer duvar paneli" class="product-image w-full h-full object-cover">
             <div class="product-overlay"></div>
           </div>
@@ -648,17 +648,8 @@
 <section id="hakkimizda" class="grain bg-forest text-paper py-28 lg:py-40 px-6 lg:px-12 relative overflow-hidden">
   <div class="max-w-[1440px] mx-auto">
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-      <div class="lg:col-span-5 reveal">
-        <div class="overflow-hidden">
-          <img loading="lazy" src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=1200&q=80"
-               alt="Bursa atölyesinde el işçiliği"
-               class="w-full h-[480px] lg:h-[620px] object-cover">
-        </div>
-        <p class="mt-4 text-[11px] tracking-[0.3em] uppercase opacity-60">Atölye — Nilüfer, Bursa</p>
-      </div>
-
-      <div class="lg:col-span-6 lg:col-start-7 reveal" data-delay="200">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+      <div class="lg:col-span-7 lg:col-start-4 reveal" data-delay="200">
         <p class="eyebrow mb-6 opacity-70">Hakkımızda — Atölye</p>
         <h2 class="font-serif h-section mb-10">
           Bursa
@@ -835,6 +826,8 @@
 
 <script>
 (function() {
+  console.warn('[Şelalemi Getir] fotograflar/ klasöründe 9 ürün için yalnız 4 fotoğraf var (selale2–selale5). Ürün kartlarında döngüsel kullanılıyor: 5–8. kartlar 1–4. kartları tekrar ediyor, 9. kart selale2 ile sonlanıyor.');
+
   // Lucide icons
   if (window.lucide) lucide.createIcons();
 
