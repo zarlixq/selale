@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Şelalemi Getir — El yapımı dekoratif şelaleler</title>
+<meta name="description" content="Şelalemi Getir, doğanın en sakin sesini iç mekânlarınıza ve bahçelerinize taşıyan, mekâna özel el yapımı dekoratif şelaleler üretir.">
+<meta name="theme-color" content="#0F3D2E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap" rel="stylesheet">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230F3D2E'/%3E%3Ctext x='16' y='22' font-family='Playfair Display, serif' font-style='italic' font-size='20' fill='%23F5F1E8' text-anchor='middle'%3EŞ%3C/text%3E%3C/svg%3E">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          forest: '#0F3D2E',
+          'forest-deep': '#082519',
+          water: '#2C7A7B',
+          champagne: '#F5F1E8',
+          anthracite: '#1A1A1A',
+          paper: '#FAFAF7',
+        },
+        fontFamily: {
+          serif: ['"Playfair Display"', 'Georgia', 'serif'],
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+<style>
+  :root {
+    --forest: #0F3D2E;
+    --water: #2C7A7B;
+    --champagne: #F5F1E8;
+    --anthracite: #1A1A1A;
+    --paper: #FAFAF7;
+  }
+
+  html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--anthracite);
+    background-color: var(--paper);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection { background-color: var(--forest); color: var(--paper); }
+
+  /* Grain texture overlay */
+  .grain { position: relative; isolation: isolate; }
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>");
+    opacity: 0.05;
+    mix-blend-mode: multiply;
+    z-index: 1;
+  }
+  .grain > * { position: relative; z-index: 2; }
+  .grain-light::after { mix-blend-mode: overlay; opacity: 0.07; }
+
+  /* Reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 1.1s cubic-bezier(.2,.7,.2,1), transform 1.1s cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal.is-visible { opacity: 1; transform: translateY(0); }
+  .reveal[data-delay="100"] { transition-delay: 0.1s; }
+  .reveal[data-delay="200"] { transition-delay: 0.2s; }
+  .reveal[data-delay="300"] { transition-delay: 0.3s; }
+  .reveal[data-delay="400"] { transition-delay: 0.4s; }
+
+  /* Nav */
+  #nav { transition: background-color .45s ease, backdrop-filter .45s ease, color .45s ease, border-color .45s ease, padding .45s ease; }
+  #nav.scrolled {
+    background-color: rgba(250, 250, 247, 0.82);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border-bottom: 1px solid rgba(15,61,46,0.08);
+    color: var(--anthracite);
+  }
+  #nav.scrolled .nav-logo,
+  #nav.scrolled .nav-link { color: var(--anthracite); }
+  #nav.scrolled .nav-cta { border-color: rgba(15,61,46,0.4); color: var(--forest); }
+  #nav.scrolled .nav-cta:hover { background-color: var(--forest); color: var(--paper); border-color: var(--forest); }
+  #nav.scrolled .menu-icon { color: var(--anthracite); }
+
+  /* Hero */
+  #hero-bg { will-change: transform; }
+  .vignette {
+    background:
+      radial-gradient(ellipse at 30% 70%, transparent 25%, rgba(0,0,0,0.55) 95%),
+      linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 28%, transparent 55%, rgba(0,0,0,0.72) 100%);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    background-color: var(--champagne);
+    color: var(--anthracite);
+    transition: transform .45s cubic-bezier(.2,.7,.2,1), background-color .45s ease, box-shadow .45s ease;
+  }
+  .btn-primary:hover {
+    background-color: var(--paper);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 44px -16px rgba(0,0,0,0.35);
+  }
+  .btn-ghost {
+    border: 1px solid rgba(250,250,247,0.55);
+    color: var(--paper);
+    transition: background-color .45s ease, border-color .45s ease, transform .45s ease;
+  }
+  .btn-ghost:hover {
+    background-color: rgba(250,250,247,0.1);
+    border-color: var(--paper);
+    transform: translateY(-2px);
+  }
+  .btn-dark {
+    background-color: var(--forest);
+    color: var(--paper);
+    transition: background-color .45s ease, transform .45s ease, box-shadow .45s ease;
+  }
+  .btn-dark:hover {
+    background-color: var(--forest-deep);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 44px -16px rgba(15,61,46,0.45);
+  }
+
+  /* Filter tabs */
+  .filter-btn {
+    position: relative;
+    color: rgba(26,26,26,0.5);
+    padding-bottom: 6px;
+    transition: color .35s ease;
+    white-space: nowrap;
+  }
+  .filter-btn::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 1px;
+    background-color: var(--forest);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .55s cubic-bezier(.2,.7,.2,1);
+  }
+  .filter-btn:hover { color: var(--anthracite); }
+  .filter-btn.active { color: var(--forest); }
+  .filter-btn.active::after { transform: scaleX(1); }
+
+  /* Masonry */
+  .masonry { column-count: 1; column-gap: 2rem; }
+  @media (min-width: 768px) { .masonry { column-count: 2; column-gap: 2.5rem; } }
+  @media (min-width: 1024px) { .masonry { column-count: 3; column-gap: 3rem; } }
+  .masonry > * {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    display: block;
+    width: 100%;
+    margin-bottom: 3rem;
+  }
+
+  /* Product card */
+  .product-card .image-wrap { overflow: hidden; position: relative; background: var(--champagne); }
+  .product-card .product-image {
+    transition: transform 2.2s cubic-bezier(.2,.7,.2,1), filter 1.2s ease;
+    will-change: transform;
+  }
+  .product-card:hover .product-image { transform: scale(1.07); }
+  .product-card .product-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(15,61,46,0.18) 100%);
+    opacity: 0;
+    transition: opacity .6s ease;
+  }
+  .product-card:hover .product-overlay { opacity: 1; }
+  .product-card .detail-arrow { transition: transform .45s cubic-bezier(.2,.7,.2,1); }
+  .product-card:hover .detail-arrow { transform: translateX(8px); }
+  .product-card { transition: transform .5s ease; }
+
+  /* Form */
+  .form-field { position: relative; }
+  .form-label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(26,26,26,0.55);
+    margin-bottom: 0.5rem;
+  }
+  .form-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(26,26,26,0.18);
+    border-radius: 0;
+    padding: 0.7rem 0;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    color: var(--anthracite);
+    transition: border-color .35s ease;
+  }
+  .form-input:focus { border-bottom-color: var(--forest); }
+  .form-input::placeholder { color: rgba(26,26,26,0.32); }
+  textarea.form-input { resize: vertical; min-height: 110px; padding-top: 0.4rem; }
+
+  /* Scroll indicator */
+  .scroll-arrow { animation: scrollPulse 2.6s ease-in-out infinite; }
+  @keyframes scrollPulse {
+    0%, 100% { transform: translateY(0); opacity: 0.6; }
+    50% { transform: translateY(10px); opacity: 1; }
+  }
+
+  /* Mobile menu */
+  .mobile-menu {
+    transform: translateX(100%);
+    transition: transform .55s cubic-bezier(.2,.7,.2,1);
+  }
+  .mobile-menu.open { transform: translateX(0); }
+  .mobile-link { transition: padding-left .4s ease; }
+  .mobile-link:hover { padding-left: 12px; }
+
+  /* Footer mark */
+  .footer-mark {
+    font-size: clamp(4.5rem, 18vw, 16rem);
+    line-height: 0.82;
+    letter-spacing: -0.045em;
+  }
+
+  /* Stats */
+  .stat-num {
+    font-size: clamp(3.5rem, 7vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  /* Process number */
+  .process-num {
+    font-size: clamp(5rem, 9vw, 8rem);
+    line-height: 0.9;
+    color: rgba(15,61,46,0.18);
+  }
+
+  /* Section labels */
+  .eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+  }
+
+  .h-section {
+    font-size: clamp(2.75rem, 6vw, 5rem);
+    line-height: 1;
+    letter-spacing: -0.015em;
+  }
+
+  /* Lucide icons inherit size */
+  [data-lucide] { display: inline-block; vertical-align: middle; }
+</style>
+</head>
+<body class="bg-paper text-anthracite antialiased">
+
+<!-- NAV -->
+<header id="nav" class="fixed top-0 inset-x-0 z-50 text-paper">
+  <div class="max-w-[1440px] mx-auto px-6 lg:px-12 py-5 lg:py-6 flex items-center justify-between">
+    <a href="#hero" class="nav-logo font-serif text-base lg:text-lg tracking-[0.18em]">ŞELALEMİ&nbsp;GETİR</a>
+    <nav class="hidden lg:flex items-center gap-12 text-[13px] tracking-[0.08em]" aria-label="Ana menü">
+      <a href="#koleksiyon" class="nav-link hover:opacity-70 transition">Koleksiyon</a>
+      <a href="#hakkimizda" class="nav-link hover:opacity-70 transition">Hakkımızda</a>
+      <a href="#surec" class="nav-link hover:opacity-70 transition">Süreç</a>
+      <a href="#iletisim" class="nav-link hover:opacity-70 transition">İletişim</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="#iletisim" class="nav-cta hidden md:inline-flex items-center px-5 py-2.5 border border-paper/50 text-[12px] tracking-[0.15em] hover:bg-paper/10 transition">
+        KATALOG İSTE
+      </a>
+      <button id="menu-toggle" class="lg:hidden p-2 menu-icon" aria-label="Menüyü aç">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu" class="mobile-menu fixed inset-0 z-[60] bg-forest text-paper lg:hidden grain">
+  <div class="relative z-10 h-full flex flex-col">
+    <div class="flex justify-between items-center px-6 py-5">
+      <span class="font-serif text-base tracking-[0.18em]">ŞELALEMİ&nbsp;GETİR</span>
+      <button id="menu-close" class="p-2" aria-label="Menüyü kapat">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    <nav class="flex flex-col gap-7 px-8 mt-20 font-serif text-4xl" aria-label="Mobil menü">
+      <a href="#koleksiyon" class="mobile-link">Koleksiyon</a>
+      <a href="#hakkimizda" class="mobile-link">Hakkımızda</a>
+      <a href="#surec" class="mobile-link">Süreç</a>
+      <a href="#iletisim" class="mobile-link">İletişim</a>
+    </nav>
+    <div class="mt-auto px-8 pb-12 text-sm opacity-70">
+      <p>Üçevler Mah. 9. Cadde No: 32</p>
+      <p>Nilüfer / Bursa</p>
+      <p class="mt-3">+90 224 000 00 00</p>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section id="hero" class="relative h-[100svh] min-h-[640px] overflow-hidden text-paper">
+  <div id="hero-bg" class="absolute -top-[8%] -bottom-[8%] inset-x-0">
+    <img src="fotograflar/selale1.jpeg"
+         alt="Şelalemi Getir — peyzaj şelalesi"
+         class="w-full h-full object-cover scale-110">
+  </div>
+  <div class="absolute inset-0 vignette pointer-events-none"></div>
+
+  <div class="relative h-full max-w-[1440px] mx-auto px-6 lg:px-12 flex flex-col justify-end pb-20 lg:pb-32">
+    <div class="max-w-3xl">
+      <p class="reveal eyebrow mb-7 opacity-80">El Yapımı Dekoratif Şelaleler — Est. 2009</p>
+      <h1 class="reveal font-serif text-[3.5rem] sm:text-7xl md:text-8xl lg:text-[9rem] leading-[0.92] mb-9 tracking-tight" data-delay="100">
+        Suyun<br>
+        <span class="italic font-normal">sessiz lüksü.</span>
+      </h1>
+      <p class="reveal text-base md:text-lg max-w-md mb-10 opacity-85 leading-relaxed" data-delay="200">
+        Bahçeniz, havuzunuz ve teraslarınız için el yapımı dekoratif şelaleler. Her biri mekâna özel ölçü, taş ve sirkülasyonla tasarlanır.
+      </p>
+      <div class="reveal flex flex-wrap items-center gap-4" data-delay="300">
+        <a href="#koleksiyon" class="btn-primary inline-flex items-center gap-3 px-7 py-4 text-[12px] tracking-[0.2em]">
+          KOLEKSİYONU KEŞFET
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+        <a href="#hakkimizda" class="btn-ghost inline-flex items-center px-7 py-4 text-[12px] tracking-[0.2em]">
+          HİKAYEMİZ
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="absolute bottom-8 right-6 lg:right-12 hidden sm:flex flex-col items-center gap-3 text-[10px] tracking-[0.4em] opacity-80">
+    <span>KAYDIRIN</span>
+    <i data-lucide="chevron-down" class="w-4 h-4 scroll-arrow"></i>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section class="grain bg-champagne py-28 lg:py-44 px-6 lg:px-12 relative overflow-hidden">
+  <div class="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-20 items-end">
+    <div class="lg:col-span-7 reveal">
+      <p class="eyebrow mb-8 text-forest/70">Manifesto — 01</p>
+      <p class="font-serif text-[2rem] md:text-5xl lg:text-[3.75rem] leading-[1.08] text-forest">
+        On beş yıldır,
+        <span class="italic">suyun mimarisini</span>
+        yeniden tasarlıyoruz.
+      </p>
+    </div>
+    <div class="lg:col-span-4 lg:col-start-9 reveal" data-delay="200">
+      <p class="text-base lg:text-[17px] leading-[1.75] text-anthracite/80">
+        Şelalemi Getir, doğanın en sakin sesini bahçenize, havuzunuza ve teraslarınıza taşıyan dekoratif su yapıları üretir. Her parça; mekâna özel ölçü, doğal taş ve sirkülasyon hesaplanarak tasarlanır. Sessiz motorlar, kapalı devre su sistemi, yıllarca bakımsız akış. Acelemiz yok — bir şelale, atölyemizden ortalama altı haftada çıkar.
+      </p>
+      <div class="mt-10 pt-8 border-t border-forest/15 flex items-center gap-3 text-forest text-sm tracking-[0.18em]">
+        <span>EL YAPIMI</span>
+        <span class="opacity-40">·</span>
+        <span>BURSA</span>
+        <span class="opacity-40">·</span>
+        <span>2009</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KOLEKSİYON -->
+<section id="koleksiyon" class="py-28 lg:py-40 px-6 lg:px-12 bg-paper">
+  <div class="max-w-[1440px] mx-auto">
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-end mb-16 lg:mb-24">
+      <div class="lg:col-span-8 reveal">
+        <p class="eyebrow mb-6 text-forest/70">Koleksiyon — 2025</p>
+        <h2 class="font-serif h-section text-forest">
+          Mekâna göre
+          <span class="italic">akan</span>
+          parçalar.
+        </h2>
+      </div>
+      <p class="lg:col-span-4 reveal max-w-sm text-[15px] text-anthracite/70 leading-[1.7]" data-delay="200">
+        Dokuz farklı seri, beş farklı kurulum tipi için. Her şelale, mekânın ölçeğine ve su debinize göre özelleştirilebilir.
+      </p>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="reveal mb-14 lg:mb-20">
+      <div class="flex flex-nowrap overflow-x-auto lg:flex-wrap gap-x-9 gap-y-4 border-b border-anthracite/10 pb-5 text-[13px] tracking-[0.12em] -mx-6 lg:mx-0 px-6 lg:px-0">
+        <button class="filter-btn active" data-filter="all">TÜMÜ</button>
+        <button class="filter-btn" data-filter="kayalik">KAYALIK ŞELALE</button>
+        <button class="filter-btn" data-filter="bahce">BAHÇE & HAVUZ</button>
+        <button class="filter-btn" data-filter="duvar">DUVAR PANELİ</button>
+        <button class="filter-btn" data-filter="kose">KÖŞE MODELİ</button>
+        <button class="filter-btn" data-filter="ozel">ÖZEL ÜRETİM</button>
+      </div>
+    </div>
+
+    <!-- Products masonry -->
+    <div id="products" class="masonry">
+
+      <article class="product-card reveal" data-category="kose">
+        <a href="#iletisim" class="block group">
+          <div class="image-wrap aspect-[3/4]">
+            <img loading="lazy" src="fotograflar/selale2.jpeg"
+                 alt="Pınar 120 köşe modeli bahçe şelalesi" class="product-image w-full h-full object-cover">
+            <div class="product-overlay"></div>
+          </div>
+          <div class="pt-6">
+            <p class="eyebrow text-forest/70 mb-2">Köşe Modeli</p>
+            <h3 class="font-serif text-[1.65rem] mb-2 leading-tight"><span class="italic">Pınar</span> 120</h3>
+            <p class="text-[14px] text-anthracite/65 mb-3 leading-relaxed">Küçük bahçeler için sessiz akış. 120cm.</p>
+            <p class="text-[10px] tracking-[0.28em] text-anthracite/45 mb-5">120 CM · 25 W · 35 LT</p>
+            <div class="flex items-end justify-between border-t border-anthracite/10 pt-4">
+              <span class="text-[15px]">18.500 ₺</span>
+              <span class="text-[11px] tracking-[0.2em] inline-flex items-center gap-2 text-forest">DETAY <i data-lucide="arrow-right" class="w-3.5 h-3.5 detail-arrow"></i></span>
+            </div>
+          </div>
+        </a>
+      </article>
+
+      <article class="product-card reveal" data-category="kayalik">
+        <a href="#iletisim" class="block group">
+          <div class="image-wrap aspect-[4/5]">
+            <img loading="lazy" src="fotograflar/selale3.jpeg"
+                 alt="Yamaç 180 üç kademeli kayalık şelale" class="product-image w-full h-full object-cover">
+            <div class="product-overlay"></div>
+          </div>
+          <div class="pt-6">
+            <p class="eyebrow text-forest/70 mb-2">Kayalık Şelale</p>
+            <h3 class="font-serif text-[1.65rem] mb-2 leading-tight">Yamaç <span class="italic">180</span></h3>
+            <p class="text-[14px] text-anthracite/65 mb-3 leading-relaxed">Doğal andezit taş, üç kademeli düşüş.</p>
+            <p class="text-[10px] tracking-[0.28em] text-anthracite/45 mb-5">180 CM · 45 W · 80 LT</p>
+            <div class="flex items-end justify-between border-t border-anthracite/10 pt-4">
+              <span class="text-[15px]">34.900 ₺</span>
+              <span class="text-[11px] tracking-[0.2em] inline-flex items-center gap-2 text-forest">DETAY <i data-lucide="arrow-right" class="w-3.5 h-3.5 detail-arrow"></i></span>
+            </div>
+          </div>
+        </a>
+      </article>
+
+      <article class="product-card reveal" data-category="bahce">
+        <a href="#iletisim" class="block group">
+          <div class="image-wrap aspect-[4/3]">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80"
+                 alt="Toros XL villa bahçesi için anıtsal kayalık şelale" class="product-image w-full h-full object-cover">
+            <div class="product-overlay"></div>
+          </div>
+          <div class="pt-6">
+            <p class="eyebrow text-forest/70 mb-2">Bahçe & Havuz</p>
+            <h3 class="font-serif text-[1.65rem] mb-2 leading-tight">Toros <span class="italic">XL</span></h3>
+            <p class="text-[14px] text-anthracite/65 mb-3 leading-relaxed">Villa bahçeleri için anıtsal kayalık tasarım.</p>
+            <p class="text-[10px] tracking-[0.28em] text-anthracite/45 mb-5">320 CM · 180 W · 450 LT</p>
+            <div class="flex items-end justify-between border-t border-anthracite/10 pt-4">
+              <span class="text-[15px]">89.000 ₺</span>
+              <span class="text-[11px] tracking-[0.2em] inline-flex items-center gap-2 text-forest">DETAY <i data-lucide="arrow-right" class="w-3.5 h-3.5 detail-arrow"></i></span>
+            </div>
+          </div>
+        </a>
+      </article>
+
+      <article class="product-card reveal" data-category="duvar">
+        <a href="#iletisim" class="block group">
+          <div class="image-wrap aspect-[3/4]">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80"
+                 alt="Granit Akış modern duvar paneli şelalesi" class="product-image w-full h-full object-cover">
+            <div class="product-overlay"></div>
+          </div>
+          <div class="pt-6">
+            <p class="eyebrow text-forest/70 mb-2">Duvar Paneli</p>
+            <h3 class="font-serif text-[1.65rem] mb-2 leading-tight">Granit <span class="italic">Akış</span></h3>
+            <p class="text-[14px] text-anthracite/65 mb-3 leading-relaxed">İç-dış mekan için modern duvar perdesi.</p>
+            <p class="text-[10px] tracking-[0.28em] text-anthracite/45 mb-5">220 CM · 60 W · 90 LT</p>
+            <div class="flex items-end justify-between border-t border-anthracite/10 pt-4">
+              <span class="text-[15px]">24.500 ₺</span>
+              <span class="text-[11px] tracking-[0.2em] inline-flex items-center gap-2 text-forest">DETAY <i data-lucide="arrow-right" class="w-3.5 h-3.5 detail-arrow"></i></span>
+            </div>
+          </div>
+        </a>
+      </article>
+
+      <article class="product-card reveal" data-category="ozel">
+        <a href="#iletisim" class="block group">
+          <div class="image-wrap aspect-[3/5]">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?w=800&q=80"
+                 alt="Kapadokya 300 tüf görünümlü dev kayalık özel üretim" class="product-image w-full h-full object-cover">
+            <div class="product-overlay"></div>
+          </div>
+          <div class="pt-6">
+            <p class="eyebrow text-forest/70 mb-2">Özel Üretim</p>
+            <h3 class="font-serif text-[1.65rem] mb-2 leading-tight"><span class="italic">Kapadokya</span> 300</h3>
+            <p class="text-[14px] text-anthracite/65 mb-3 leading-relaxed">Tüf görünümlü dev kayalık, projeye özel.</p>
+            <p class="text-[10px] tracking-[0.28em] text-anthracite/45 mb-5">300 CM · 220 W · 600 LT</p>
+            <div class="flex items-end justify-between border-t border-anthracite/10 pt-4">
+              <span class="text-[15px]">156.000 ₺</span>
+              <span class="text-[11px] tracking-[0.2em] inline-flex items-center gap-2 text-forest">DETAY <i data-lucide="arrow-right" class="w-3.5 h-3.5 detail-arrow"></i></span>
+            </div>
+          </div>
+        </a>
+      </article>
+
+      <article class="product-card reveal" data-category="bahce">
+        <a href="#iletisim" class="block group">
+          <div class="image-wrap aspect-[4/3]">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1493857671505-72967e2e2760?w=800&q=80"
+                 alt="Bahçe Düşü havuza entegre sirkülasyonlu şelale" class="product-image w-full h-full object-cover">
+            <div class="product-overlay"></div>
+          </div>
+          <div class="pt-6">
+            <p class="eyebrow text-forest/70 mb-2">Bahçe & Havuz</p>
+            <h3 class="font-serif text-[1.65rem] mb-2 leading-tight">Bahçe <span class="italic">Düşü</span></h3>
+            <p class="text-[14px] text-anthracite/65 mb-3 leading-relaxed">Havuza entegre, sirkülasyonlu sistem.</p>
+            <p class="text-[10px] tracking-[0.28em] text-anthracite/45 mb-5">200 CM · 120 W · 320 LT</p>
+            <div class="flex items-end justify-between border-t border-anthracite/10 pt-4">
+              <span class="text-[15px]">67.500 ₺</span>
+              <span class="text-[11px] tracking-[0.2em] inline-flex items-center gap-2 text-forest">DETAY <i data-lucide="arrow-right" class="w-3.5 h-3.5 detail-arrow"></i></span>
+            </div>
+          </div>
+        </a>
+      </article>
+
+      <article class="product-card reveal" data-category="kose">
+        <a href="#iletisim" class="block group">
+          <div class="image-wrap aspect-square">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1678754183715-87b12a70ef28?w=800&q=80"
+                 alt="Andezit Mini teras ve balkonlar için kompakt köşe şelalesi" class="product-image w-full h-full object-cover">
+            <div class="product-overlay"></div>
+          </div>
+          <div class="pt-6">
+            <p class="eyebrow text-forest/70 mb-2">Köşe Modeli</p>
+            <h3 class="font-serif text-[1.65rem] mb-2 leading-tight">Andezit <span class="italic">Mini</span></h3>
+            <p class="text-[14px] text-anthracite/65 mb-3 leading-relaxed">Teras ve balkonlar için kompakt model.</p>
+            <p class="text-[10px] tracking-[0.28em] text-anthracite/45 mb-5">95 CM · 18 W · 22 LT</p>
+            <div class="flex items-end justify-between border-t border-anthracite/10 pt-4">
+              <span class="text-[15px]">12.400 ₺</span>
+              <span class="text-[11px] tracking-[0.2em] inline-flex items-center gap-2 text-forest">DETAY <i data-lucide="arrow-right" class="w-3.5 h-3.5 detail-arrow"></i></span>
+            </div>
+          </div>
+        </a>
+      </article>
+
+      <article class="product-card reveal" data-category="kayalik">
+        <a href="#iletisim" class="block group">
+          <div class="image-wrap aspect-[4/5]">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1496449903678-68ddcb189a24?w=800&q=80"
+                 alt="Çağlayan 240 çok katmanlı kayalık şelale" class="product-image w-full h-full object-cover">
+            <div class="product-overlay"></div>
+          </div>
+          <div class="pt-6">
+            <p class="eyebrow text-forest/70 mb-2">Kayalık Şelale</p>
+            <h3 class="font-serif text-[1.65rem] mb-2 leading-tight"><span class="italic">Çağlayan</span> 240</h3>
+            <p class="text-[14px] text-anthracite/65 mb-3 leading-relaxed">Çok katmanlı kaya yüzey, derin sessiz ses.</p>
+            <p class="text-[10px] tracking-[0.28em] text-anthracite/45 mb-5">240 CM · 95 W · 180 LT</p>
+            <div class="flex items-end justify-between border-t border-anthracite/10 pt-4">
+              <span class="text-[15px]">54.000 ₺</span>
+              <span class="text-[11px] tracking-[0.2em] inline-flex items-center gap-2 text-forest">DETAY <i data-lucide="arrow-right" class="w-3.5 h-3.5 detail-arrow"></i></span>
+            </div>
+          </div>
+        </a>
+      </article>
+
+      <article class="product-card reveal" data-category="duvar">
+        <a href="#iletisim" class="block group">
+          <div class="image-wrap aspect-[3/4]">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1761538236523-7b173413e27a?w=800&q=80"
+                 alt="Mermer Akış otel ve ofisler için mat mermer duvar paneli" class="product-image w-full h-full object-cover">
+            <div class="product-overlay"></div>
+          </div>
+          <div class="pt-6">
+            <p class="eyebrow text-forest/70 mb-2">Duvar Paneli</p>
+            <h3 class="font-serif text-[1.65rem] mb-2 leading-tight">Mermer <span class="italic">Akış</span></h3>
+            <p class="text-[14px] text-anthracite/65 mb-3 leading-relaxed">İç mekan otel ve ofisler için mat mermer.</p>
+            <p class="text-[10px] tracking-[0.28em] text-anthracite/45 mb-5">260 CM · 75 W · 120 LT</p>
+            <div class="flex items-end justify-between border-t border-anthracite/10 pt-4">
+              <span class="text-[15px]">38.700 ₺</span>
+              <span class="text-[11px] tracking-[0.2em] inline-flex items-center gap-2 text-forest">DETAY <i data-lucide="arrow-right" class="w-3.5 h-3.5 detail-arrow"></i></span>
+            </div>
+          </div>
+        </a>
+      </article>
+
+    </div>
+
+    <p id="no-results" class="hidden text-center py-20 font-serif italic text-2xl text-anthracite/40">Bu kategoride henüz parça yok.</p>
+  </div>
+</section>
+
+<!-- SÜREÇ -->
+<section id="surec" class="grain bg-champagne py-28 lg:py-40 px-6 lg:px-12 relative overflow-hidden">
+  <div class="max-w-[1440px] mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-end mb-20 lg:mb-28">
+      <div class="lg:col-span-7 reveal">
+        <p class="eyebrow mb-6 text-forest/70">Süreç — Atölye</p>
+        <h2 class="font-serif h-section text-forest">
+          Dört adım,
+          <span class="italic">altı hafta.</span>
+        </h2>
+      </div>
+      <p class="lg:col-span-4 lg:col-start-9 reveal max-w-sm text-[15px] text-anthracite/70 leading-[1.7]" data-delay="200">
+        Keşiften kuruluma — her şelale, dört elden ve tek bir tempodan geçer.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-16 gap-x-10 lg:gap-x-12">
+      <div class="reveal">
+        <p class="font-serif italic process-num mb-6">01</p>
+        <h3 class="font-serif text-[1.6rem] mb-4 text-forest">Keşif</h3>
+        <p class="text-[14.5px] text-anthracite/75 leading-[1.75]">Mekânınızı ziyaret eder; ışığı, sesi ve ölçeği birlikte okuruz.</p>
+      </div>
+      <div class="reveal" data-delay="100">
+        <p class="font-serif italic process-num mb-6">02</p>
+        <h3 class="font-serif text-[1.6rem] mb-4 text-forest">Tasarım</h3>
+        <p class="text-[14.5px] text-anthracite/75 leading-[1.75]">Atölyemizde, mekâna özel eskizler ve malzeme paletini hazırlarız.</p>
+      </div>
+      <div class="reveal" data-delay="200">
+        <p class="font-serif italic process-num mb-6">03</p>
+        <h3 class="font-serif text-[1.6rem] mb-4 text-forest">Üretim</h3>
+        <p class="text-[14.5px] text-anthracite/75 leading-[1.75]">Taş, su ve metal ustalarımız parçayı el işçiliğiyle birleştirir.</p>
+      </div>
+      <div class="reveal" data-delay="300">
+        <p class="font-serif italic process-num mb-6">04</p>
+        <h3 class="font-serif text-[1.6rem] mb-4 text-forest">Kurulum</h3>
+        <p class="text-[14.5px] text-anthracite/75 leading-[1.75]">Ekibimiz mekâna gelir, parçayı yerleştirir ve sessizliği teslim eder.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HAKKIMIZDA -->
+<section id="hakkimizda" class="grain bg-forest text-paper py-28 lg:py-40 px-6 lg:px-12 relative overflow-hidden">
+  <div class="max-w-[1440px] mx-auto">
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+      <div class="lg:col-span-5 reveal">
+        <div class="overflow-hidden">
+          <img loading="lazy" src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=1200&q=80"
+               alt="Bursa atölyesinde el işçiliği"
+               class="w-full h-[480px] lg:h-[620px] object-cover">
+        </div>
+        <p class="mt-4 text-[11px] tracking-[0.3em] uppercase opacity-60">Atölye — Nilüfer, Bursa</p>
+      </div>
+
+      <div class="lg:col-span-6 lg:col-start-7 reveal" data-delay="200">
+        <p class="eyebrow mb-6 opacity-70">Hakkımızda — Atölye</p>
+        <h2 class="font-serif h-section mb-10">
+          Bursa
+          <span class="italic">atölyesi.</span>
+        </h2>
+        <div class="space-y-6 text-[15.5px] leading-[1.85] opacity-85 max-w-xl">
+          <p>2009'dan bu yana, Bursa Nilüfer'deki atölyemizde geleneksel taş işçiliğini çağdaş tasarım diliyle birleştiriyoruz. Her şelale; bir mimar, bir taş ustası ve bir su mühendisinin imzasını taşır.</p>
+          <p>Acelemiz yok. Bir parça, ortalama altı haftada elimizden çıkar. Çünkü iyi bir şelalenin sesi, ancak iyi bir sessizlikten doğar.</p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-6 lg:gap-10 mt-16 pt-12 border-t border-paper/15">
+          <div>
+            <p class="font-serif stat-num">15<span class="text-champagne italic">+</span></p>
+            <p class="text-[10px] tracking-[0.3em] uppercase opacity-65 mt-3">Yıl Tecrübe</p>
+          </div>
+          <div>
+            <p class="font-serif stat-num">800<span class="text-champagne italic">+</span></p>
+            <p class="text-[10px] tracking-[0.3em] uppercase opacity-65 mt-3">Tamamlanan Proje</p>
+          </div>
+          <div>
+            <p class="font-serif stat-num">47</p>
+            <p class="text-[10px] tracking-[0.3em] uppercase opacity-65 mt-3">İl</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- İLETİŞİM -->
+<section id="iletisim" class="bg-paper py-28 lg:py-40 px-6 lg:px-12">
+  <div class="max-w-[1440px] mx-auto">
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
+
+      <div class="lg:col-span-5 reveal">
+        <p class="eyebrow mb-6 text-forest/70">İletişim — Bursa</p>
+        <h2 class="font-serif h-section text-forest mb-10">
+          Sessiz bir
+          <span class="italic">konuşma</span>
+          için.
+        </h2>
+        <p class="text-[15.5px] text-anthracite/75 leading-[1.8] max-w-md mb-12">
+          Mekânınızı, zevkinizi ve bütçenizi dinlemek için sabırlı bir ekibimiz var. Önce dinleriz; sonra teklif sunarız.
+        </p>
+
+        <ul class="space-y-7 text-[15px]">
+          <li class="flex items-start gap-5">
+            <i data-lucide="map-pin" class="w-4 h-4 mt-1.5 text-forest"></i>
+            <div>
+              <p class="eyebrow text-anthracite/55 mb-1">Atölye</p>
+              <p>Üçevler Mah. 9. Cadde No: 32</p>
+              <p>Nilüfer / Bursa</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-5">
+            <i data-lucide="phone" class="w-4 h-4 mt-1.5 text-forest"></i>
+            <div>
+              <p class="eyebrow text-anthracite/55 mb-1">Telefon</p>
+              <a href="tel:+902240000000" class="hover:text-forest transition">+90 224 000 00 00</a>
+            </div>
+          </li>
+          <li class="flex items-start gap-5">
+            <i data-lucide="mail" class="w-4 h-4 mt-1.5 text-forest"></i>
+            <div>
+              <p class="eyebrow text-anthracite/55 mb-1">E-posta</p>
+              <a href="mailto:merhaba@selalemigetir.com" class="hover:text-forest transition">merhaba@selalemigetir.com</a>
+            </div>
+          </li>
+          <li class="flex items-start gap-5">
+            <i data-lucide="clock" class="w-4 h-4 mt-1.5 text-forest"></i>
+            <div>
+              <p class="eyebrow text-anthracite/55 mb-1">Çalışma Saatleri</p>
+              <p>Pazartesi – Cumartesi</p>
+              <p>10:00 – 19:00</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="lg:col-span-6 lg:col-start-7 reveal" data-delay="200">
+        <form id="contact-form" class="space-y-9" novalidate>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-9">
+            <div class="form-field">
+              <label for="f-name" class="form-label">Adınız</label>
+              <input id="f-name" name="name" type="text" required class="form-input" placeholder="Ad Soyad">
+            </div>
+            <div class="form-field">
+              <label for="f-phone" class="form-label">Telefon</label>
+              <input id="f-phone" name="phone" type="tel" class="form-input" placeholder="+90 5__ ___ __ __">
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="f-mail" class="form-label">E-posta</label>
+            <input id="f-mail" name="mail" type="email" required class="form-input" placeholder="ornek@eposta.com">
+          </div>
+          <div class="form-field">
+            <label for="f-msg" class="form-label">Mesajınız</label>
+            <textarea id="f-msg" name="message" rows="4" class="form-input" placeholder="Mekânınızdan, beklediğiniz histen kısaca bahsedin…"></textarea>
+          </div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 pt-4">
+            <p class="text-[12px] text-anthracite/55 max-w-xs leading-relaxed">Mesajınıza en geç iki iş günü içinde bizzat dönüş yaparız.</p>
+            <button type="submit" class="btn-dark inline-flex items-center gap-3 px-9 py-4 text-[12px] tracking-[0.2em]">
+              GÖNDER
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="grain bg-forest text-paper px-6 lg:px-12 pt-24 pb-10 relative overflow-hidden">
+  <div class="max-w-[1440px] mx-auto">
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-16">
+      <div class="lg:col-span-5">
+        <p class="eyebrow opacity-65 mb-5">Şelalemi Getir — 2009</p>
+        <p class="font-serif text-2xl leading-relaxed max-w-md italic">
+          "Suyun en güzel hâli, dinlerken kendi nefesini duyabildiğin hâlidir."
+        </p>
+      </div>
+
+      <div class="lg:col-span-3 lg:col-start-7">
+        <p class="eyebrow opacity-65 mb-5">Keşfet</p>
+        <ul class="space-y-3 text-[14px]">
+          <li><a href="#koleksiyon" class="hover:opacity-70 transition">Koleksiyon</a></li>
+          <li><a href="#surec" class="hover:opacity-70 transition">Süreç</a></li>
+          <li><a href="#hakkimizda" class="hover:opacity-70 transition">Atölye</a></li>
+          <li><a href="#iletisim" class="hover:opacity-70 transition">İletişim</a></li>
+        </ul>
+      </div>
+
+      <div class="lg:col-span-3">
+        <p class="eyebrow opacity-65 mb-5">İletişim</p>
+        <ul class="space-y-3 text-[14px] opacity-85">
+          <li>Nilüfer, Bursa</li>
+          <li><a href="tel:+902240000000" class="hover:opacity-70 transition">+90 224 000 00 00</a></li>
+          <li><a href="mailto:merhaba@selalemigetir.com" class="hover:opacity-70 transition">merhaba@selalemigetir.com</a></li>
+        </ul>
+
+        <div class="flex items-center gap-5 mt-8">
+          <a href="#" aria-label="Instagram" class="opacity-80 hover:opacity-100 transition">
+            <i data-lucide="instagram" class="w-5 h-5"></i>
+          </a>
+          <a href="#" aria-label="Pinterest" class="opacity-80 hover:opacity-100 transition">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M12 0a12 12 0 0 0-4.373 23.178c-.105-.95-.2-2.404.043-3.44.218-.928 1.4-5.918 1.4-5.918s-.359-.717-.359-1.776c0-1.667.967-2.91 2.171-2.91 1.024 0 1.519.768 1.519 1.691 0 1.029-.655 2.567-.994 3.992-.283 1.194.6 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.013-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.137.893 2.737a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+          </a>
+          <a href="#" aria-label="WhatsApp" class="opacity-80 hover:opacity-100 transition">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="font-serif footer-mark text-center text-paper/95 select-none pointer-events-none mt-4 mb-10">
+      <span class="italic">Şelalemi</span> Getir
+    </div>
+
+    <div class="border-t border-paper/15 pt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-[12px] opacity-65">
+      <p>© 2009 – 2026 Şelalemi Getir. Tüm hakları saklıdır.</p>
+      <div class="flex items-center gap-6">
+        <a href="#" class="hover:opacity-100 transition">Gizlilik</a>
+        <a href="#" class="hover:opacity-100 transition">KVKK</a>
+        <a href="#" class="hover:opacity-100 transition">Çerezler</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  // Lucide icons
+  if (window.lucide) lucide.createIcons();
+
+  // Nav scroll state
+  const nav = document.getElementById('nav');
+  const setNavState = () => {
+    if (window.scrollY > 40) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  };
+  setNavState();
+  window.addEventListener('scroll', setNavState, { passive: true });
+
+  // Mobile menu
+  const menu = document.getElementById('mobile-menu');
+  document.getElementById('menu-toggle').addEventListener('click', () => {
+    menu.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+  const closeMenu = () => {
+    menu.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+  document.getElementById('menu-close').addEventListener('click', closeMenu);
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+
+  // Hero parallax
+  const heroBg = document.getElementById('hero-bg');
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking && heroBg) {
+      window.requestAnimationFrame(() => {
+        const y = window.scrollY;
+        if (y < window.innerHeight * 1.2) {
+          heroBg.style.transform = `translate3d(0, ${y * 0.32}px, 0)`;
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // Reveal on scroll
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // Filter
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const products = document.querySelectorAll('#products .product-card');
+  const noResults = document.getElementById('no-results');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      let visible = 0;
+      products.forEach(p => {
+        const match = (filter === 'all' || p.dataset.category === filter);
+        p.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      noResults.classList.toggle('hidden', visible !== 0);
+    });
+  });
+
+  // Form
+  document.getElementById('contact-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.querySelector('#f-name').value.trim();
+    const mail = form.querySelector('#f-mail').value.trim();
+    if (!name || !mail) {
+      alert('Lütfen adınızı ve e-posta adresinizi giriniz.');
+      return;
+    }
+    alert('Teşekkürler ' + name.split(' ')[0] + '. Mesajınızı aldık — iki iş günü içinde size dönüş yapacağız.');
+    form.reset();
+  });
+
+  // Smooth scroll polyfill for anchor links (CSS handles modern browsers)
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      if (id.length > 1) {
+        const target = document.querySelector(id);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
