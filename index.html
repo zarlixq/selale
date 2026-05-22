@@ -132,15 +132,31 @@
   .product-card {
     cursor: pointer;
     transition: transform .55s cubic-bezier(.2,.7,.2,1), box-shadow .55s ease;
+    animation: cardFadeIn .55s cubic-bezier(.2,.7,.2,1) both;
   }
   .product-card:hover { transform: translateY(-4px) scale(1.015); box-shadow: 0 30px 60px -28px rgba(15,61,46,0.28); }
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
   .product-card .image-wrap { overflow: hidden; position: relative; background: var(--champagne); aspect-ratio: 4 / 5; }
-  .product-card .product-image, .product-card .product-video {
+  .product-card .product-image {
     width: 100%; height: 100%; object-fit: cover;
     transition: transform 2s cubic-bezier(.2,.7,.2,1);
   }
-  .product-card:hover .product-image,
-  .product-card:hover .product-video { transform: scale(1.06); }
+  .product-card:hover .product-image { transform: scale(1.06); }
+  .product-card .video-placeholder {
+    width: 100%; height: 100%;
+    background: linear-gradient(180deg, #134132 0%, #0F3D2E 60%, #082519 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(245, 241, 232, 0.85);
+    transition: transform 1.4s cubic-bezier(.2,.7,.2,1);
+  }
+  .product-card:hover .video-placeholder { transform: scale(1.04); }
+  .thumb-video {
+    display: block; width: 100%; height: 100%;
+    background: linear-gradient(180deg, #134132 0%, #0F3D2E 70%, #082519 100%);
+  }
   .badge-strip {
     position: absolute;
     right: 12px; bottom: 12px;
@@ -282,6 +298,8 @@
     <img src="fotograflar/selale1/1.jpeg"
          alt="Şelalemi Getir — el yapımı dekoratif şelale"
          class="w-full h-full object-cover scale-105"
+         width="1920" height="1280"
+         fetchpriority="high" decoding="async"
          onerror="this.style.display='none'">
   </div>
   <div class="absolute inset-0 vignette pointer-events-none"></div>
@@ -443,59 +461,38 @@
   const isVideo = (name) => VIDEO_EXT.test(name);
 
   // ---------- LOAD ----------
-  const MEDIA_EXTS = ['jpeg', 'jpg', 'png', 'webp', 'mp4', 'mov', 'webm'];
+  const MAX_FOLDERS = 30;
 
-  async function fileExists(url) {
+  async function fetchProduct(folder, folderNum) {
+    let res;
     try {
-      const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
-      return res.ok;
-    } catch (e) { return false; }
+      res = await fetch(`fotograflar/${folder}/bilgi.json`, { cache: 'no-store' });
+    } catch (e) { return null; }
+    if (!res.ok) return null;
+
+    const text = await res.text();
+    if (!text.trim()) return null;
+    let data;
+    try { data = JSON.parse(text); } catch (e) { return null; }
+    if (!data || typeof data !== 'object') return null;
+
+    const hasContent = (Array.isArray(data.medya) && data.medya.length) || data.model;
+    if (!hasContent) return null;
+    return { ...data, folder, folderNum };
   }
 
-  // If JSON doesn't list `medya`, probe the folder for 1.{ext}, 2.{ext}, ...
-  // until a number has no matches. Images come back before videos.
-  async function discoverMedia(folder) {
-    const found = [];
-    for (let n = 1; n <= 50; n++) {
-      let match = null;
-      for (const ext of MEDIA_EXTS) {
-        const url = `fotograflar/${folder}/${n}.${ext}`;
-        if (await fileExists(url)) { match = `${n}.${ext}`; break; }
-      }
-      if (!match) break;
-      found.push(match);
-    }
-    return found;
-  }
-
+  // Fetch all selale1..selaleN in parallel; insert cards as each lands.
   async function loadProducts() {
-    let i = 1;
-    const MAX_TRY = 200;
-    while (i < MAX_TRY) {
+    const promises = [];
+    for (let i = 1; i <= MAX_FOLDERS; i++) {
       const folder = `selale${i}`;
-      let res;
-      try {
-        res = await fetch(`fotograflar/${folder}/bilgi.json`, { cache: 'no-store' });
-      } catch (e) { break; }
-      if (!res.ok) break;
-
-      // Tolerate empty / invalid JSON — treat as {}
-      const text = await res.text();
-      let data = {};
-      if (text.trim()) {
-        try { data = JSON.parse(text); } catch (e) { data = {}; }
-      }
-
-      // If no medya list provided, auto-discover from filesystem
-      if (!Array.isArray(data.medya) || data.medya.length === 0) {
-        data.medya = await discoverMedia(folder);
-      }
-
-      const hasContent = (data.medya && data.medya.length) || data.model;
-      if (hasContent) products.push({ ...data, folder });
-      i++;
+      const p = fetchProduct(folder, i).then((product) => {
+        if (product) insertCard(product);
+      }).catch(() => {});
+      promises.push(p);
     }
-    renderProducts();
+    await Promise.allSettled(promises);
+    finalizeGrid();
   }
 
   // ---------- RENDER ----------
@@ -504,7 +501,8 @@
     grid.innerHTML = '';
     for (let i = 0; i < n; i++) {
       const el = document.createElement('div');
-      el.className = 'flex flex-col gap-4';
+      el.className = 'skeleton-card flex flex-col gap-4';
+      el.style.order = '9999';
       el.innerHTML = `
         <div class="skeleton" style="aspect-ratio: 4/5; border-radius: 2px;"></div>
         <div class="skeleton h-5 w-2/3" style="border-radius: 2px;"></div>
@@ -512,6 +510,25 @@
       `;
       grid.appendChild(el);
     }
+  }
+
+  function insertCard(p) {
+    const grid = document.getElementById('product-grid');
+    const card = buildCard(p);
+    card.style.order = String(p.folderNum);
+    grid.appendChild(card);
+    lucide.createIcons();
+  }
+
+  function finalizeGrid() {
+    document.querySelectorAll('#product-grid .skeleton-card').forEach((el) => el.remove());
+    const anyCard = document.querySelector('#product-grid .product-card');
+    if (!anyCard) document.getElementById('empty-state').classList.remove('hidden');
+    lucide.createIcons();
+  }
+
+  function firstImage(media) {
+    return media.find((f) => !isVideo(f));
   }
 
   function formatTL(n) {
@@ -531,67 +548,48 @@
     return parts.length ? parts.join(' × ') + ' cm' : null;
   }
 
-  function renderProducts() {
-    const grid = document.getElementById('product-grid');
-    const empty = document.getElementById('empty-state');
-
-    if (!products.length) {
-      grid.innerHTML = '';
-      empty.classList.remove('hidden');
-      lucide.createIcons();
-      return;
-    }
-
-    grid.innerHTML = '';
-    products.forEach((p, idx) => grid.appendChild(buildCard(p, idx)));
-    observeReveals();
-    lucide.createIcons();
-  }
-
-  function buildCard(p, idx) {
+  function buildCard(p) {
     const media = Array.isArray(p.medya) ? p.medya : [];
-    const first = media[0];
     const mediaCount = media.length;
     const videoCount = media.filter(isVideo).length;
+    const imageCount = mediaCount - videoCount;
+    const thumb = firstImage(media);
     const dims = dimsString(p);
 
     const card = document.createElement('article');
-    card.className = 'product-card reveal';
-    card.dataset.delay = String(Math.min(idx * 50, 300));
+    card.className = 'product-card';
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
     card.setAttribute('aria-label', (p.model || 'Ürün') + ' detayını aç');
 
-    // image-wrap
+    // image-wrap — sadece görsel ya da yer tutucu; video kartta YÜKLENMEZ
     const wrap = document.createElement('div');
     wrap.className = 'image-wrap';
 
-    if (first) {
-      const src = `fotograflar/${p.folder}/${encodeURIComponent(first)}`;
-      if (isVideo(first)) {
-        const v = document.createElement('video');
-        v.className = 'product-video';
-        v.src = src;
-        v.muted = true;
-        v.playsInline = true;
-        v.preload = 'metadata';
-        wrap.appendChild(v);
-      } else {
-        const img = document.createElement('img');
-        img.className = 'product-image';
-        img.src = src;
-        img.alt = p.model ? p.model : 'Şelale modeli';
-        img.loading = 'lazy';
-        wrap.appendChild(img);
-      }
+    if (thumb) {
+      const img = document.createElement('img');
+      img.className = 'product-image';
+      img.src = `fotograflar/${p.folder}/${encodeURIComponent(thumb)}`;
+      img.alt = p.model ? p.model : 'Şelale modeli';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.setAttribute('fetchpriority', 'low');
+      img.width = 800;
+      img.height = 1000;
+      wrap.appendChild(img);
+    } else if (mediaCount > 0) {
+      // Sadece video var → koyu yeşil yer tutucu + Play
+      const ph = document.createElement('div');
+      ph.className = 'video-placeholder';
+      ph.innerHTML = '<i data-lucide="play" style="width:54px;height:54px"></i>';
+      wrap.appendChild(ph);
     }
 
-    // badges
     if (mediaCount > 0) {
       const strip = document.createElement('div');
       strip.className = 'badge-strip';
       strip.innerHTML = `
-        <span class="badge"><i data-lucide="image"></i>${mediaCount}</span>
+        ${imageCount > 0 ? `<span class="badge"><i data-lucide="image"></i>${imageCount}</span>` : ''}
         ${videoCount > 0 ? `<span class="badge"><i data-lucide="play"></i>${videoCount}</span>` : ''}
       `;
       wrap.appendChild(strip);
@@ -713,7 +711,7 @@
       v.className = 'carousel-media';
       v.src = src;
       v.controls = true;
-      v.preload = 'metadata';
+      v.preload = 'none';
       v.playsInline = true;
       stage.appendChild(v);
     } else {
@@ -739,11 +737,10 @@
       t.setAttribute('aria-label', `Medya ${i + 1}`);
       const src = `fotograflar/${modalProduct.folder}/${encodeURIComponent(file)}`;
       if (isVideo(file)) {
-        const v = document.createElement('video');
-        v.src = src;
-        v.muted = true;
-        v.preload = 'metadata';
-        t.appendChild(v);
+        // Thumbnail strip'te video tag yok — sadece koyu yer tutucu + play ikon
+        const ph = document.createElement('span');
+        ph.className = 'thumb-video';
+        t.appendChild(ph);
         const ov = document.createElement('span');
         ov.className = 'play-overlay';
         ov.innerHTML = '<i data-lucide="play" style="width:18px;height:18px"></i>';
@@ -753,6 +750,7 @@
         img.src = src;
         img.alt = '';
         img.loading = 'lazy';
+        img.decoding = 'async';
         t.appendChild(img);
       }
       t.addEventListener('click', () => { mediaIndex = i; showMedia(); });

@@ -3,5 +3,11 @@
   "yukseklik": 95,
   "genislik": 140,
   "onAcilim": 180,
-  "fiyat": 40000
+  "fiyat": 40000,
+  "medya": [
+    "1.jpeg",
+    "2.jpeg",
+    "3.mp4",
+    "4.mp4"
+  ]
 }

@@ -2,5 +2,14 @@
   "model": "Ağaç Kütük Model",
   "yukseklik": 30,
   "genislik": 80,
-  "fiyat": 12000
+  "fiyat": 12000,
+  "medya": [
+    "1.jpeg",
+    "2.jpeg",
+    "3.jpeg",
+    "4.mp4",
+    "5.mp4",
+    "6.mp4",
+    "7.mp4"
+  ]
 }
